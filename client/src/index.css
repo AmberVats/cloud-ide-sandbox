@@ -1,0 +1,247 @@
+/* ==========================================================================
+   CodeSphere Design System & Core Styles (Dark IDE Aesthetics)
+   ========================================================================== */
+
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --bg-hover: #30363d;
+  --bg-active: #38404a;
+
+  --border-subtle: #30363d;
+  --border-focus: #58a6ff;
+
+  --text-main: #f0f6fc;
+  --text-muted: #8b949e;
+  --text-faint: #484f58;
+
+  --accent-primary: #6366f1;
+  --accent-primary-hover: #4f46e5;
+  --accent-success: #238636;
+  --accent-success-hover: #2ea043;
+  --accent-warning: #d29922;
+  --accent-danger: #f85149;
+  --accent-info: #58a6ff;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+
+  --header-height: 52px;
+  --status-bar-height: 28px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+/* App Layout Grid */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--bg-primary);
+}
+
+.main-workspace {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - var(--header-height) - var(--status-bar-height));
+  overflow: hidden;
+}
+
+/* Sidebar / File Explorer */
+.sidebar {
+  width: 260px;
+  min-width: 200px;
+  max-width: 400px;
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+/* Editor & Terminal Center Stage */
+.editor-terminal-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.editor-pane {
+  flex: 1;
+  height: 55%;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  background-color: #1e1e1e;
+}
+
+.pane-resizer {
+  height: 4px;
+  background-color: var(--border-subtle);
+  cursor: row-resize;
+  transition: background-color 0.2s;
+  z-index: 10;
+}
+.pane-resizer:hover {
+  background-color: var(--accent-primary);
+}
+
+.terminal-pane {
+  flex: 1;
+  height: 45%;
+  min-height: 120px;
+  background-color: #0c0e14;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Tab Bar */
+.tab-bar {
+  display: flex;
+  align-items: center;
+  background-color: #181a1f;
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--text-muted);
+  background-color: transparent;
+  border-right: 1px solid var(--border-subtle);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.tab-item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-main);
+}
+.tab-item.active {
+  background-color: #1e1e1e;
+  color: var(--text-main);
+  border-top: 2px solid var(--accent-primary);
+  font-weight: 500;
+}
+
+/* Buttons & Controls */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background-color: var(--accent-success);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--accent-success-hover);
+  box-shadow: 0 0 10px rgba(35, 134, 54, 0.4);
+}
+
+.btn-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-main);
+  border-color: var(--border-subtle);
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  border-color: var(--border-focus);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Status Bar */
+.status-bar {
+  height: var(--status-bar-height);
+  background-color: #161b22;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+/* Animations */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

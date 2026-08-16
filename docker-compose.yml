@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Backend API & WebSocket Orchestrator
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: codesphere-server
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - HOST=0.0.0.0
+      - DEFAULT_TIMEOUT_MS=5000
+      - DEFAULT_MEMORY_LIMIT_MB=256
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - temp-workspaces:/app/.tmp_workspaces
+    restart: unless-stopped
+
+  # Frontend Next/Vite Client
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: codesphere-client
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+  # Redis In-Memory Session & Cache
+  redis:
+    image: redis:7-alpine
+    container_name: codesphere-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  temp-workspaces:
