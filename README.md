@@ -9,6 +9,10 @@
 
 An enterprise-grade, browser-based collaborative IDE and secure distributed remote code execution system (similar to **CodeSandbox**, **LeetCode**, and **Replit**). Built with React 18, TypeScript, Monaco Editor, Xterm.js, WebSockets, isolated Docker runtime sandboxes with Linux `cgroups`, and an ultra-fast safe process execution engine.
 
+> 📖 **Full Project Documentation:**
+> - [PROJECT_DOCUMENTATION.md](file:///D:/SDE/cloud-ide-sandbox/PROJECT_DOCUMENTATION.md) (Complete Markdown Architecture, Tech Stack & Run Guide)
+> - [PROJECT_DOCUMENTATION.html](file:///D:/SDE/cloud-ide-sandbox/PROJECT_DOCUMENTATION.html) (Interactive Dark-Themed Documentation Portal)
+
 ---
 
 ## 📌 Project Overview & Motivation

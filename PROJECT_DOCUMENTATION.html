@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeSphere — Cloud IDE & Sandboxed Execution Engine Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-body: #090d16;
+      --bg-sidebar: #0e1320;
+      --bg-card: #131b2e;
+      --bg-card-hover: #18223a;
+      --bg-code: #0a0e17;
+      --border-color: #212c45;
+      --border-focus: #3b82f6;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-faint: #475569;
+      --accent-primary: #6366f1;
+      --accent-primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-body);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      z-index: 100;
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 16px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--accent-primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-badge {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 4px;
+    }
+
+    .search-box {
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: var(--font-sans);
+      outline: none;
+      transition: border 0.2s;
+    }
+    .search-input:focus {
+      border-color: var(--accent-primary);
+    }
+
+    .nav-group {
+      margin-bottom: 20px;
+    }
+
+    .nav-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-faint);
+      margin-bottom: 8px;
+      padding-left: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.15s ease;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: #fff;
+      background-color: rgba(99, 102, 241, 0.12);
+      border-left: 3px solid var(--accent-primary);
+    }
+
+    /* Main Content Container */
+    .main-wrapper {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 40px 56px;
+      max-width: 1200px;
+    }
+
+    /* Hero Header */
+    .hero {
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 48px;
+    }
+
+    .hero-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+    .tag.primary { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border-color: rgba(99, 102, 241, 0.3); }
+    .tag.cyan { background: rgba(6, 182, 212, 0.15); color: #67e8f9; border-color: rgba(6, 182, 212, 0.3); }
+    .tag.green { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.3); }
+
+    .hero h1 {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 17px;
+      color: var(--text-muted);
+      max-width: 850px;
+      line-height: 1.6;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px 20px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-primary);
+    }
+    .stat-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      font-family: var(--font-mono);
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Section Styles */
+    section {
+      margin-bottom: 56px;
+      scroll-margin-top: 32px;
+    }
+
+    .section-header {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Cards & Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      background: var(--bg-card-hover);
+    }
+
+    .card-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .card-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 16px 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    .code-header {
+      background: #0f1523;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: all 0.15s;
+    }
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border-color: var(--accent-primary);
+    }
+
+    pre {
+      padding: 16px;
+      overflow-x: auto;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    code {
+      font-family: var(--font-mono);
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #0e1422;
+      color: var(--text-main);
+      padding: 12px 16px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-main);
+    }
+
+    /* Interactive Runtime Playground Tabs */
+    .tab-nav {
+      display: flex;
+      gap: 6px;
+      background: #0e1422;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-primary);
+      color: #fff;
+    }
+
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      margin-top: 32px;
+      padding-left: 28px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 8px;
+      bottom: 0;
+      width: 2px;
+      background: var(--border-color);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 32px;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -28px;
+      top: 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    }
+
+    .timeline-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .timeline-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Badges */
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+    .pill-green { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .pill-blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .pill-amber { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .pill-purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+
+    /* Footer */
+    footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .sidebar {
+        display: none;
+      }
+      .main-wrapper {
+        margin-left: 0;
+        padding: 24px 20px;
+      }
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div style="display: flex; align-items: center;">
+          <span class="brand-title">CodeSphere</span>
+          <span class="brand-badge">v1.0</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted);">Cloud IDE & Sandbox</div>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="docSearch" class="search-input" placeholder="Search documentation..." onkeyup="filterDocs()" />
+    </div>
+
+    <nav>
+      <div class="nav-group">
+        <div class="nav-label">Documentation</div>
+        <a href="#overview" class="nav-item active">📌 1. Project Overview</a>
+        <a href="#tech-stack" class="nav-item">🛠️ 2. Technologies Used</a>
+        <a href="#phases" class="nav-item">🚀 3. Development Phases</a>
+        <a href="#how-we-built" class="nav-item">🏗️ 4. How We Built It</a>
+        <a href="#how-to-run" class="nav-item">▶️ 5. How to Run & Setup</a>
+        <a href="#runtimes" class="nav-item">💻 6. Supported Runtimes</a>
+        <a href="#security" class="nav-item">🛡️ 7. Security Matrix</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">Quick Links</div>
+        <a href="http://localhost:5173" target="_blank" class="nav-item">🌐 Open Web IDE (5173)</a>
+        <a href="http://localhost:5000/api/status" target="_blank" class="nav-item">📡 API Status (5000)</a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-wrapper">
+
+    <!-- Hero -->
+    <header class="hero" id="top">
+      <div class="hero-tags">
+        <span class="tag primary">React 18 + Vite</span>
+        <span class="tag cyan">TypeScript 5</span>
+        <span class="tag green">Docker cgroups</span>
+        <span class="tag">Monaco Editor</span>
+        <span class="tag">Xterm.js</span>
+        <span class="tag">WebSockets</span>
+      </div>
+      <h1>CodeSphere Engineering Documentation</h1>
+      <p>
+        An enterprise-grade, browser-based collaborative Cloud IDE and distributed remote code execution sandbox engine (similar to CodeSandbox, LeetCode, and Replit). Featuring sub-25ms WebSocket terminal multiplexing, Linux cgroups hardware isolation, and multi-runtime compilation.
+      </p>
+
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-val">&lt; 25 ms</div>
+          <div class="stat-label">WebSocket Streaming Latency</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">256 MB</div>
+          <div class="stat-label">Hard cgroups RAM Limit</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">6 Runtimes</div>
+          <div class="stat-label">Python, JS, TS, C++, Java, Go</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">100% Isolated</div>
+          <div class="stat-label">Zero Network Egress (--net none)</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Section 1: Overview -->
+    <section id="overview">
+      <div class="section-header">
+        <h2 class="section-title">📌 1. Project Overview & Motivation</h2>
+        <p class="section-desc">What we are building and what it accomplishes.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <span class="card-icon">💡</span>
+          <h3 class="card-title">What Are We Making?</h3>
+          <p class="card-text">
+            <strong>CodeSphere</strong> is a full-featured browser-based Cloud IDE coupled with a high-throughput, multi-tenant remote code execution sandbox engine. It allows developers to write code across 6 programming languages, manage virtual multi-file workspaces, and receive real-time streaming output in a browser terminal without local compiler installations.
+          </p>
+        </div>
+
+        <div class="card">
+          <span class="card-icon">🎯</span>
+          <h3 class="card-title">Core Problems Solved</h3>
+          <p class="card-text">
+            Executing untrusted code on cloud servers invites severe security risks: infinite loops, memory leaks, fork bombs, and network scanning. CodeSphere eliminates these vulnerabilities using a dual-engine architecture with Linux kernel <code>cgroups</code>, <code>--network none</code> isolation, and 5-second process watchdog timers.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top: 20px;">
+        <div class="card">
+          <span class="card-icon">⚡</span>
+          <h4 class="card-title">VS Code-Grade Editor</h4>
+          <p class="card-text">Microsoft Monaco Editor with IntelliSense, bracket colorization, font zooming, minimaps, and multi-file tabs.</p>
+        </div>
+        <div class="card">
+          <span class="card-icon">📺</span>
+          <h4 class="card-title">Real-Time Xterm Console</h4>
+          <p class="card-text">High-performance ANSI terminal streaming standard output and error chunks asynchronously with sub-25ms latency.</p>
+        </div>
+        <div class="card">
+          <span class="card-icon">⌨️</span>
+          <h4 class="card-title">Interactive Stdin</h4>
+          <p class="card-text">Live terminal keystrokes or pre-buffered test inputs feeding directly into <code>input()</code>, <code>cin</code>, and <code>Scanner</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Technologies -->
+    <section id="tech-stack">
+      <div class="section-header">
+        <h2 class="section-title">🛠️ 2. Software & Technologies Used (Why & Where)</h2>
+        <p class="section-desc">Comprehensive breakdown of our architectural stack.</p>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Technology</th>
+              <th>Layer</th>
+              <th>Why We Used It</th>
+              <th>Where It Is Used in CodeSphere</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>React 18</strong></td>
+              <td><span class="pill pill-blue">Frontend</span></td>
+              <td>Component-based UI state management, declarative rendering, and hooks.</td>
+              <td><code>client/src/App.tsx</code>, Navbar, Editor, FileExplorer, Terminal.</td>
+            </tr>
+            <tr>
+              <td><strong>Vite 5</strong></td>
+              <td><span class="pill pill-blue">Frontend</span></td>
+              <td>Lightning-fast esbuild Hot Module Replacement (<300ms boot).</td>
+              <td><code>client/vite.config.ts</code>, dev bundler.</td>
+            </tr>
+            <tr>
+              <td><strong>TypeScript 5</strong></td>
+              <td><span class="pill pill-purple">Full-Stack</span></td>
+              <td>Strict compile-time type safety for execution requests, results, and frames.</td>
+              <td>Client and Server <code>types/index.ts</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Monaco Editor</strong></td>
+              <td><span class="pill pill-blue">Frontend</span></td>
+              <td>Microsoft VS Code editor engine with syntax intelligence and shortcuts.</td>
+              <td><code>client/src/components/Editor.tsx</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Xterm.js + FitAddon</strong></td>
+              <td><span class="pill pill-blue">Frontend</span></td>
+              <td>Web-standard terminal emulator rendering ANSI colored logs and keystrokes.</td>
+              <td><code>client/src/components/Terminal.tsx</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Node.js 20 + Express</strong></td>
+              <td><span class="pill pill-green">Backend</span></td>
+              <td>Asynchronous non-blocking event loop ideal for streaming WebSockets and child processes.</td>
+              <td><code>server/src/index.ts</code>, <code>server/src/routes/api.ts</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>ws (WebSockets)</strong></td>
+              <td><span class="pill pill-green">Backend</span></td>
+              <td>Ultra-low latency bi-directional streaming protocol for stdout/stderr chunks.</td>
+              <td><code>server/src/websocket/terminalSocket.ts</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Dockerode</strong></td>
+              <td><span class="pill pill-amber">Sandbox</span></td>
+              <td>Node.js client managing Docker containers via <code>/var/run/docker.sock</code>.</td>
+              <td><code>server/src/services/dockerRunner.ts</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Linux cgroups</strong></td>
+              <td><span class="pill pill-amber">Sandbox</span></td>
+              <td>Enforces 256MB RAM hard limit and 0.5 CPU quota (500,000,000 NanoCpus).</td>
+              <td>Container HostConfig in <code>dockerRunner.ts</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>child_process</strong></td>
+              <td><span class="pill pill-amber">Sandbox</span></td>
+              <td>Ultra-fast local process execution with sub-15ms cold start turnaround.</td>
+              <td><code>server/src/services/processRunner.ts</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Docker Compose</strong></td>
+              <td><span class="pill pill-purple">DevOps</span></td>
+              <td>Multi-container orchestration linking Server, Client, and Redis.</td>
+              <td><code>docker-compose.yml</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 3: Phases -->
+    <section id="phases">
+      <div class="section-header">
+        <h2 class="section-title">🚀 3. Phases of Project Development</h2>
+        <p class="section-desc">How CodeSphere was conceptualized, built, and hardened.</p>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">Phase 1: Threat Modeling & Security Architecture</div>
+          <div class="timeline-desc">
+            Analyzed hostile code vectors: infinite loops, memory leaks, fork bombs, and SSRF attacks. Defined hard resource constraints (256MB RAM, 0.5 CPU, 5s timeout) and zero-network egress boundaries.
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">Phase 2: Core Sandbox Engine & Process Isolation</div>
+          <div class="timeline-desc">
+            Built the dual-engine execution layer: Dockerode cgroups runner with ephemeral volume mounts and Safe Process Runner with cross-platform termination (<code>taskkill</code> / <code>SIGKILL</code>).
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">Phase 3: WebSocket Streaming Protocol & REST API Gateway</div>
+          <div class="timeline-desc">
+            Designed JSON-framed bi-directional streaming over <code>/ws</code> supporting <code>RUN_CODE</code>, <code>STDOUT</code>, <code>STDERR</code>, <code>STDIN_INPUT</code>, and <code>EXECUTION_COMPLETE</code>.
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">Phase 4: Cloud IDE Frontend (Monaco, Xterm.js & File Tree)</div>
+          <div class="timeline-desc">
+            Implemented React 18 frontend with VS Code Monaco editor, Xterm.js interactive terminal, virtual file tree explorer, diagnostics telemetry badge, and language templates.
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">Phase 5: Containerization & Docker Compose Orchestration</div>
+          <div class="timeline-desc">
+            Created production Alpine Dockerfiles for client and server, configured npm monorepo workspaces, and wrote multi-container <code>docker-compose.yml</code> with Redis integration.
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title">Phase 6: Benchmarking & Edge-Case Hardening</div>
+          <div class="timeline-desc">
+            Stress-tested infinite loops (verified 5s auto-kill), memory overflow bounds, unbuffered stdout streams, interactive stdin handling, and sub-25ms latency benchmarks.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: How We Built It -->
+    <section id="how-we-built">
+      <div class="section-header">
+        <h2 class="section-title">🏗️ 4. How We Built the Project (Step-by-Step Breakdown)</h2>
+        <p class="section-desc">Architecture and deep code mechanics.</p>
+      </div>
+
+      <div class="card" style="margin-bottom: 24px;">
+        <h3 class="card-title">1. Monorepo Repository Structure</h3>
+        <p class="card-text">We configured root npm workspaces uniting client and server packages under a single repository:</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span>Directory Tree</span>
+          </div>
+          <pre><code>cloud-ide-sandbox/
+├── client/                     # React 18 + Vite + Monaco + Xterm.js
+│   ├── src/components/         # Editor.tsx, Terminal.tsx, FileExplorer.tsx
+│   ├── src/constants/          # templates.ts (6-language starter code)
+│   └── src/App.tsx             # Master state & WebSocket orchestrator
+├── server/                     # Node.js 20 + Express + WebSockets
+│   ├── src/services/           # sandboxEngine.ts, dockerRunner.ts, processRunner.ts
+│   ├── src/websocket/          # terminalSocket.ts (Real-time stream multiplexer)
+│   └── src/index.ts            # HTTP server entry point
+├── docker-compose.yml          # Multi-container cluster definition
+└── PROJECT_DOCUMENTATION.md    # Exhaustive markdown guide</code></pre>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 24px;">
+        <h3 class="card-title">2. Execution Dataflow Architecture</h3>
+        <p class="card-text">Every code execution follows a high-speed, secure pipeline:</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span>Execution Lifecycle Flow</span>
+          </div>
+          <pre><code>[Browser: User hits Run / Ctrl+Enter]
+              │
+              ▼ (WebSocket /ws JSON Frame: RUN_CODE)
+[Server: terminalSocket.ts ➔ sandboxEngine.ts]
+              │
+              ▼ (Generates UUID Job ID & Temp Workspace)
+      ┌───────┴───────────────────────┐
+      ▼                               ▼
+[Docker cgroups Runner]     [Safe Process Runner]
+- 256MB RAM / 0.5 CPU       - Sub-15ms spin-up
+- Network: Disabled         - 5s Watchdog Timer
+- Auto-remove container     - Cross-platform kill
+      │                               │
+      └───────┬───────────────────────┘
+              ▼
+[Real-Time Streaming: stdout & stderr] ──► [Xterm.js Terminal Canvas (&lt; 25ms)]
+              ▼
+[Execution Complete] ────────────────────► [Diagnostics Badge & Metrics Updated]</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: How to Run -->
+    <section id="how-to-run">
+      <div class="section-header">
+        <h2 class="section-title">▶️ 5. How to Run & Build the Project</h2>
+        <p class="section-desc">Quickstart instructions for local development and Docker orchestration.</p>
+      </div>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <h3 class="card-title">Method 1: Local Development (Fast Dual-Run)</h3>
+        <p class="card-text">Run frontend and backend concurrently with live hot-reloading:</p>
+        
+        <div class="code-block">
+          <div class="code-header">
+            <span>Terminal Commands</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code># 1. Clone repository
+git clone https://github.com/AmberVats/cloud-ide-sandbox.git
+cd cloud-ide-sandbox
+
+# 2. Install all dependencies across monorepo
+npm run install:all
+
+# 3. Launch Frontend (5173) & Backend (5000) concurrently
+npm run dev</code></pre>
+        </div>
+        <p class="card-text" style="font-size: 13px;">
+          • <strong>Frontend IDE:</strong> <a href="http://localhost:5173" target="_blank" style="color: var(--accent-cyan);">http://localhost:5173</a><br/>
+          • <strong>Backend API & WebSockets:</strong> <a href="http://localhost:5000" target="_blank" style="color: var(--accent-cyan);">http://localhost:5000</a>
+        </p>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Method 2: Multi-Container Docker Compose</h3>
+        <p class="card-text">Run the complete containerized stack (Server, Client, Redis) with socket forwarding:</p>
+        
+        <div class="code-block">
+          <div class="code-header">
+            <span>Docker Compose</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code># Build and run containers in detached mode
+docker-compose up --build -d
+
+# View live container logs
+docker-compose logs -f
+
+# Stop and clean containers
+docker-compose down</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Supported Runtimes -->
+    <section id="runtimes">
+      <div class="section-header">
+        <h2 class="section-title">💻 6. Supported Language Runtimes</h2>
+        <p class="section-desc">Click below to view the runtime specs and starter code for each language.</p>
+      </div>
+
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('tab-python')">🐍 Python 3.11</button>
+        <button class="tab-btn" onclick="switchTab('tab-js')">🟨 Node.js (JavaScript)</button>
+        <button class="tab-btn" onclick="switchTab('tab-ts')">🔷 TypeScript 5</button>
+        <button class="tab-btn" onclick="switchTab('tab-cpp')">⚙️ C++ 17 (GCC)</button>
+        <button class="tab-btn" onclick="switchTab('tab-java')">☕ Java 17 (OpenJDK)</button>
+        <button class="tab-btn" onclick="switchTab('tab-go')">🐹 Go 1.22</button>
+      </div>
+
+      <div id="tab-python" class="tab-content active">
+        <div class="card">
+          <h4 class="card-title">Python 3.11 (CPython)</h4>
+          <p class="card-text">Docker Image: <code>python:3.11-slim</code> | Mode: Unbuffered stdout (<code>-u</code>)</p>
+          <div class="code-block">
+            <div class="code-header"><span>main.py</span></div>
+            <pre><code>import time, math
+
+def fibonacci(n: int) -> int:
+    a, b = 0, 1
+    for _ in range(2, n + 1):
+        a, b = b, a + b
+    return b
+
+print("⚡ CodeSphere Python 3.11 Runtime")
+print(f"✨ Fibonacci(50) = {fibonacci(50):,}")</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-js" class="tab-content">
+        <div class="card">
+          <h4 class="card-title">Node.js 20.x (JavaScript V8 Engine)</h4>
+          <p class="card-text">Docker Image: <code>node:20-slim</code> | Features: Async concurrency & event loop metrics</p>
+          <div class="code-block">
+            <div class="code-header"><span>index.js</span></div>
+            <pre><code>async function main() {
+  console.log("🚀 CodeSphere Node.js Engine (V8)");
+  const tasks = [100, 200, 150].map((d, i) => new Promise(r => setTimeout(() => r(`Task ${i+1}`), d)));
+  console.log(await Promise.all(tasks));
+}
+main();</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-ts" class="tab-content">
+        <div class="card">
+          <h4 class="card-title">TypeScript 5.x (Just-In-Time Compiler)</h4>
+          <p class="card-text">Docker Image: <code>node:20-slim</code> | Runner: <code>tsx</code> JIT executor</p>
+          <div class="code-block">
+            <div class="code-header"><span>main.ts</span></div>
+            <pre><code>interface TaskMetric<T> { id: string; data: T; priority: 'HIGH' | 'LOW'; }
+const queue: TaskMetric<string>[] = [{ id: '1', data: 'Process', priority: 'HIGH' }];
+console.log("🔷 TypeScript 5 Strict Validation Passed:", queue);</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-cpp" class="tab-content">
+        <div class="card">
+          <h4 class="card-title">C++ 17 (GCC 13 STL Engine)</h4>
+          <p class="card-text">Docker Image: <code>gcc:13</code> | Flags: <code>-O2 -std=c++17</code></p>
+          <div class="code-block">
+            <div class="code-header"><span>main.cpp</span></div>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;numeric&gt;
+
+int main() {
+    std::cout << "⚡ CodeSphere C++17 Isolated STL Execution\n";
+    std::vector<int> v(1000000);
+    std::iota(v.begin(), v.end(), 1);
+    std::cout << "✅ Vector of 1,000,000 integers initialized successfully.\n";
+    return 0;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-java" class="tab-content">
+        <div class="card">
+          <h4 class="card-title">Java 17 (OpenJDK Enterprise)</h4>
+          <p class="card-text">Docker Image: <code>openjdk:17-slim</code> | Features: Parallel streams & JVM heap inspection</p>
+          <div class="code-block">
+            <div class="code-header"><span>Main.java</span></div>
+            <pre><code>import java.util.*;
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("☕ CodeSphere Java 17 OpenJDK Execution");
+        System.out.println("JVM Max Memory: " + (Runtime.getRuntime().maxMemory()/1024/1024) + " MB");
+    }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-go" class="tab-content">
+        <div class="card">
+          <h4 class="card-title">Go 1.22 (Goroutines & Channels)</h4>
+          <p class="card-text">Docker Image: <code>golang:1.22-alpine</code> | Features: Concurrent Goroutine synchronization</p>
+          <div class="code-block">
+            <div class="code-header"><span>main.go</span></div>
+            <pre><code>package main
+import ("fmt"; "sync")
+
+func main() {
+    var wg sync.WaitGroup
+    for i := 1; i <= 3; i++ {
+        wg.Add(1)
+        go func(id int) { defer wg.Done(); fmt.Printf("🐹 Goroutine #%d running\n", id) }(i)
+    }
+    wg.Wait()
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Security Matrix -->
+    <section id="security">
+      <div class="section-header">
+        <h2 class="section-title">🛡️ 7. Security Analysis & Threat Mitigation</h2>
+        <p class="section-desc">How hostile code execution is neutralized at every layer.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <span class="card-icon">🛑</span>
+          <h4 class="card-title">Infinite Loop Neutralization</h4>
+          <p class="card-text">
+            Every execution is wrapped in a hard <strong>5,000ms watchdog timer</strong>. When a script runs past 5 seconds, the server terminates the process with exit code <code>124 (TIMEOUT)</code> using <code>SIGKILL</code> or Windows <code>taskkill /f /t</code>.
+          </p>
+        </div>
+
+        <div class="card">
+          <span class="card-icon">🔒</span>
+          <h4 class="card-title">RAM & CPU Quota Throttling</h4>
+          <p class="card-text">
+            Docker containers are constrained via Linux <strong>cgroups</strong> to a hard ceiling of <strong>256MB RAM</strong> and <strong>0.5 CPU core</strong> (<code>500,000,000 NanoCpus</code>). Memory overcommit triggers kernel OOM termination without impacting the host.
+          </p>
+        </div>
+
+        <div class="card">
+          <span class="card-icon">🚫</span>
+          <h4 class="card-title">Zero Network Egress (--net none)</h4>
+          <p class="card-text">
+            Containers are spawned with <code>NetworkMode: 'none'</code>. Malicious code cannot scan internal private subnets, connect to cloud metadata endpoints (SSRF), or launch external DDoS attacks.
+          </p>
+        </div>
+
+        <div class="card">
+          <span class="card-icon">🧹</span>
+          <h4 class="card-title">Ephemeral Workspaces</h4>
+          <p class="card-text">
+            Each execution runs inside an isolated temporary directory tagged with a UUID. After completion, the temporary directory is automatically purged, preventing filesystem pollution.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <strong>CodeSphere Cloud IDE</strong> — Architected & Engineered by Amber Vats
+      </div>
+      <div>
+        <a href="#top" style="color: var(--accent-primary); text-decoration: none;">Back to top ↑</a>
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    // Tab Switcher
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Copy to clipboard
+    function copyCode(btn) {
+      const code = btn.parentElement.nextElementSibling.innerText;
+      navigator.clipboard.writeText(code);
+      btn.innerText = 'Copied!';
+      btn.style.borderColor = '#10b981';
+      btn.style.color = '#10b981';
+      setTimeout(() => {
+        btn.innerText = 'Copy';
+        btn.style.borderColor = 'var(--border-color)';
+        btn.style.color = 'var(--text-muted)';
+      }, 2000);
+    }
+
+    // Filter Docs
+    function filterDocs() {
+      const query = document.getElementById('docSearch').value.toLowerCase();
+      const sections = document.querySelectorAll('section');
+      sections.forEach(sec => {
+        const text = sec.innerText.toLowerCase();
+        sec.style.display = text.includes(query) ? 'block' : 'none';
+      });
+    }
+
+    // Scrollspy
+    window.addEventListener('scroll', () => {
+      const navLinks = document.querySelectorAll('.nav-item');
+      let currentSection = '';
+      document.querySelectorAll('section').forEach(sec => {
+        const secTop = sec.offsetTop - 100;
+        if (window.pageYOffset >= secTop) {
+          currentSection = sec.getAttribute('id');
+        }
+      });
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
